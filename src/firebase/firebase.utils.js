@@ -13,6 +13,37 @@ const config = {
   measurementId: "G-5SKP5SJFQ6"
 };
 
+export const createUserProfileDocument = async (userAuth, additionalData) => {
+  if (!userAuth) return;
+
+  // // find fake user with id: 123test
+  // const userRef = firestore.doc("users/123test");
+  // // get snapshot of user
+  // const snapshot = await userRef.get();
+
+  // destructure uid from userAuth returned from google api
+  const { uid, displayName, email } = userAuth;
+  // query firebase for user with uid
+  const userRef = firestore.doc(`users/${uid}`);
+  const snapshot = await userRef.get();
+
+  if (!snapshot.exists) {
+    const createdAt = new Date();
+    // if no user exists create new user in firebase
+    try {
+      await userRef.set({
+        displayName,
+        email,
+        createdAt,
+        ...additionalData
+      });
+    } catch (error) {
+      console.log("error creating user", error.message);
+    }
+  }
+  return userRef;
+};
+
 firebase.initializeApp(config);
 
 export const auth = firebase.auth();

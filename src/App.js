@@ -1,7 +1,7 @@
 import React, { Component } from "react";
 import "./App.css";
 import { Switch, Route } from "react-router-dom";
-import { auth } from "./firebase/firebase.utils";
+import { auth, createUserProfileDocument } from "./firebase/firebase.utils";
 
 import Homepage from "./pages/homepage/Homepage";
 import Shop from "./pages/shop/Shop";
@@ -29,9 +29,25 @@ class App extends Component {
   unsubsuscribeFromAuth = null;
 
   componentDidMount() {
-    this.unsubsuscribeFromAuth = auth.onAuthStateChanged(user =>
-      this.setState({ currentUser: user })
-    );
+    this.unsubsuscribeFromAuth = auth.onAuthStateChanged(async userAuth => {
+      if (userAuth) {
+        // userRef returned from the creaetUserProfileDocument
+        const userRef = await createUserProfileDocument(userAuth);
+        // call .data() on the snapshot to get user data
+        userRef.onSnapshot(snapShot =>
+          this.setState({
+            currentUser: {
+              // user id only exists on the snapshot
+              id: snapShot.id,
+              // but the user data is found on snapshot.data()
+              ...snapShot.data()
+            }
+          })
+        );
+      }
+      // if userAuth is null, sets currentUser to null
+      this.setState({ currentUser: userAuth });
+    });
   }
 
   componentWillUnmount() {
