@@ -1,52 +1,37 @@
 import React, { Component } from "react";
 import "./App.css";
-import { Switch, Route } from "react-router-dom";
+import { Switch, Route, Redirect } from "react-router-dom";
 import { auth, createUserProfileDocument } from "./firebase/firebase.utils";
+
+import { connect } from "react-redux";
 
 import Homepage from "./pages/homepage/Homepage";
 import Shop from "./pages/shop/Shop";
 import Header from "./components/header/Header";
 import Sign from "./components/sign/Sign";
-
-const SecretPage = ({
-  match: {
-    params: { id }
-  }
-}) => (
-  <div>
-    <h1>You've found {id}'s secret page!</h1>
-  </div>
-);
+import { setCurrentUser } from "./redux/user/user-action";
 
 class App extends Component {
-  constructor() {
-    super();
-    this.state = {
-      currentUser: null
-    };
-  }
-
-  unsubsuscribeFromAuth = null;
-
   componentDidMount() {
+    const { setCurrentUser } = this.props;
+
     this.unsubsuscribeFromAuth = auth.onAuthStateChanged(async userAuth => {
       if (userAuth) {
         // userRef returned from the creaetUserProfileDocument
         const userRef = await createUserProfileDocument(userAuth);
+
         // call .data() on the snapshot to get user data
         userRef.onSnapshot(snapShot =>
-          this.setState({
-            currentUser: {
-              // user id only exists on the snapshot
-              id: snapShot.id,
-              // but the user data is found on snapshot.data()
-              ...snapShot.data()
-            }
+          setCurrentUser({
+            // user id only exists on the snapshot
+            id: snapShot.id,
+            // but the user data is found on snapshot.data()
+            ...snapShot.data()
           })
         );
       }
       // if userAuth is null, sets currentUser to null
-      this.setState({ currentUser: userAuth });
+      setCurrentUser(userAuth);
     });
   }
 
@@ -57,16 +42,31 @@ class App extends Component {
   render() {
     return (
       <div>
-        <Header currentUser={this.state.currentUser} />
+        <Header />
         <Switch>
           <Route exact path="/" component={Homepage} />
           <Route exact path="/shop" component={Shop} />
-          <Route exact path="/signin" component={Sign} />
-          <Route path="/secret/:id" component={SecretPage} />
+          <Route
+            exact
+            path="/signin"
+            render={
+              () => (this.props.currentUser ? <Redirect to="/" /> : <Sign />) // if there's a currentUser redirect to main
+            }
+          />
         </Switch>
       </div>
     );
   }
 }
 
-export default App;
+const mapStateToProps = ({ user }) => ({
+  currentUser: user.currentUser
+});
+
+const mapDispatchToProps = dispatch => ({
+  // setCurrentUser returns user object
+  // dispatch, 'dispatches' to reducers
+  setCurrentUser: user => dispatch(setCurrentUser(user))
+});
+
+export default connect(mapStateToProps, mapDispatchToProps)(App);
