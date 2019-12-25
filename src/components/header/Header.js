@@ -7,7 +7,6 @@ import { connect } from "react-redux";
 import { auth } from "../../firebase/firebase.utils";
 
 import CartIcon from "../cart-icon/CartIcon";
-import CartDropDown from "../cart-dropdown/CartDropdown";
 import CartDropdown from "../cart-dropdown/CartDropdown";
 
 const Header = ({ currentUser, hidden }) => (
