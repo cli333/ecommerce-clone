@@ -11,6 +11,7 @@ import Shop from "./pages/shop/Shop";
 import Checkout from "./pages/checkout/Checkout";
 import Header from "./components/header/Header";
 import Sign from "./components/sign/Sign";
+import Collection from "./pages/collection/Collection";
 import { setCurrentUser } from "./redux/user/user-action";
 import { selectCurrentUser } from "./redux/user/user-selector";
 
@@ -49,6 +50,7 @@ class App extends Component {
         <Switch>
           <Route exact path="/" component={Homepage} />
           <Route exact path="/shop" component={Shop} />
+          <Route path={"/shop/:collectionId"} component={Collection} />
           <Route exact path="/checkout" component={Checkout} />
           <Route
             exact
