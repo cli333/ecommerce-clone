@@ -3,7 +3,6 @@ import "./App.css";
 import { Switch, Route, Redirect } from "react-router-dom";
 import { auth, createUserProfileDocument } from "./firebase/firebase.utils";
 import { createStructuredSelector } from "reselect";
-
 import { connect } from "react-redux";
 
 import Homepage from "./pages/homepage/Homepage";
